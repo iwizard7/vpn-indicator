@@ -43,7 +43,8 @@ jobs:
     - name: Build in debug mode
       run: |
         echo "Building in debug mode..."
-        swift build
+        export CI=true
+        timeout 300 swift build || (echo "Build timed out after 5 minutes" && exit 1)
 
     - name: Build in release mode
       run: |

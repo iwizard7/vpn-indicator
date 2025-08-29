@@ -31,7 +31,8 @@ jobs:
     - name: Build application
       run: |
         echo "Building VPN Indicator..."
-        swift build --configuration release
+        export CI=true
+        timeout 300 swift build --configuration release || (echo "Build timed out after 5 minutes" && exit 1)
 
         # Verify build artifacts
         if [ -f ".build/release/VPNIndicator" ]; then

@@ -1455,9 +1455,19 @@ app.delegate = delegate
 app.setActivationPolicy(.accessory)
 
 // Check if we're running in CI/CD environment
-if ProcessInfo.processInfo.environment["CI"] != nil ||
-   ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] != nil {
+let isCI = ProcessInfo.processInfo.environment["CI"] != nil ||
+           ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] != nil ||
+           ProcessInfo.processInfo.environment["CONTINUOUS_INTEGRATION"] != nil ||
+           ProcessInfo.processInfo.environment["BUILD_NUMBER"] != nil
+
+if isCI {
     print("Running in CI/CD environment - exiting after setup")
+    print("CI Environment variables detected:")
+    print("- CI: \(ProcessInfo.processInfo.environment["CI"] ?? "not set")")
+    print("- GITHUB_ACTIONS: \(ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] ?? "not set")")
+    print("- CONTINUOUS_INTEGRATION: \(ProcessInfo.processInfo.environment["CONTINUOUS_INTEGRATION"] ?? "not set")")
+    print("- BUILD_NUMBER: \(ProcessInfo.processInfo.environment["BUILD_NUMBER"] ?? "not set")")
+
     // In CI/CD, just set up the app and exit without running the main loop
     exit(0)
 } else {
