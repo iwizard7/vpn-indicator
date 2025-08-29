@@ -33,6 +33,15 @@ jobs:
         echo "Building VPN Indicator..."
         swift build --configuration release
 
+        # Verify build artifacts
+        if [ -f ".build/release/VPNIndicator" ]; then
+          echo "✅ Build successful - executable found"
+          ls -la .build/release/VPNIndicator
+        else
+          echo "❌ Build failed - executable not found"
+          exit 1
+        fi
+
     - name: Create application bundle
       run: |
         echo "Creating application bundle..."

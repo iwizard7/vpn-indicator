@@ -1454,4 +1454,13 @@ app.delegate = delegate
 // Set activation policy to accessory to hide from Dock
 app.setActivationPolicy(.accessory)
 
-app.run()
+// Check if we're running in CI/CD environment
+if ProcessInfo.processInfo.environment["CI"] != nil ||
+   ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] != nil {
+    print("Running in CI/CD environment - exiting after setup")
+    // In CI/CD, just set up the app and exit without running the main loop
+    exit(0)
+} else {
+    print("Running in normal environment - starting main loop")
+    app.run()
+}
