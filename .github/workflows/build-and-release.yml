@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    timeout-minutes: 10
 
     steps:
     - name: Checkout code
@@ -32,7 +33,7 @@ jobs:
       run: |
         echo "Building VPN Indicator..."
         export CI=true
-        timeout 300 swift build --configuration release || (echo "Build timed out after 5 minutes" && exit 1)
+        swift build --configuration release
 
         # Verify build artifacts
         if [ -f ".build/release/VPNIndicator" ]; then
