@@ -1458,19 +1458,24 @@ app.setActivationPolicy(.accessory)
 let isCI = ProcessInfo.processInfo.environment["CI"] != nil ||
            ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] != nil ||
            ProcessInfo.processInfo.environment["CONTINUOUS_INTEGRATION"] != nil ||
-           ProcessInfo.processInfo.environment["BUILD_NUMBER"] != nil
+           ProcessInfo.processInfo.environment["BUILD_NUMBER"] != nil ||
+           CommandLine.arguments.contains("--ci") ||
+           CommandLine.arguments.contains("--test")
+
+print("Environment check:")
+print("- CI: \(ProcessInfo.processInfo.environment["CI"] ?? "not set")")
+print("- GITHUB_ACTIONS: \(ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] ?? "not set")")
+print("- CONTINUOUS_INTEGRATION: \(ProcessInfo.processInfo.environment["CONTINUOUS_INTEGRATION"] ?? "not set")")
+print("- BUILD_NUMBER: \(ProcessInfo.processInfo.environment["BUILD_NUMBER"] ?? "not set")")
+print("- Command line args: \(CommandLine.arguments)")
+print("- Is CI detected: \(isCI)")
 
 if isCI {
-    print("Running in CI/CD environment - exiting after setup")
-    print("CI Environment variables detected:")
-    print("- CI: \(ProcessInfo.processInfo.environment["CI"] ?? "not set")")
-    print("- GITHUB_ACTIONS: \(ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] ?? "not set")")
-    print("- CONTINUOUS_INTEGRATION: \(ProcessInfo.processInfo.environment["CONTINUOUS_INTEGRATION"] ?? "not set")")
-    print("- BUILD_NUMBER: \(ProcessInfo.processInfo.environment["BUILD_NUMBER"] ?? "not set")")
-
-    // In CI/CD, just set up the app and exit without running the main loop
+    print("✅ CI/CD environment detected - exiting gracefully")
+    // In CI/CD, just validate that the app can be initialized without running the main loop
+    print("✅ Application initialized successfully for CI/CD")
     exit(0)
 } else {
-    print("Running in normal environment - starting main loop")
+    print("✅ Normal environment - starting GUI application")
     app.run()
 }

@@ -45,6 +45,7 @@ jobs:
       run: |
         echo "Building in debug mode..."
         export CI=true
+        export GITHUB_ACTIONS=true
         swift build
 
     - name: Build in release mode

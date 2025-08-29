@@ -33,6 +33,7 @@ jobs:
       run: |
         echo "Building VPN Indicator..."
         export CI=true
+        export GITHUB_ACTIONS=true
         swift build --configuration release
 
         # Verify build artifacts
