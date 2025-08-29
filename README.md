@@ -1,5 +1,10 @@
 # VPN Indicator
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/iwizard7/vpn-indicator/releases)
+[![macOS](https://img.shields.io/badge/platform-macOS%2012+-orange.svg)](https://github.com/iwizard7/vpn-indicator)
+[![Swift](https://img.shields.io/badge/swift-5.9+-brightgreen.svg)](https://swift.org)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
+
 Мощный индикатор статуса VPN для macOS с широкими возможностями настройки и автоматизации.
 
 ## ✨ Возможности
@@ -39,7 +44,7 @@
 ### Сборка из исходников
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/yourusername/vpn-indicator.git
+git clone https://github.com/iwizard7/vpn-indicator.git
 cd vpn-indicator
 
 # Собрать проект
@@ -118,7 +123,7 @@ let vpnClients = [
 - ✅ NordVPN
 - ✅ Tunnelblick
 - ✅ Viscosity
-- ✅ OpenConnect (BCS)
+- ✅ OpenConnect
 
 ### Системные требования
 - **macOS**: 12.0+

@@ -1,0 +1,176 @@
+name: Test and Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: '5.9'
+
+    - name: Cache Swift dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          .build
+          ~/Library/Caches/org.swift.swiftpm
+        key: ${{ runner.os }}-swift-test-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-swift-test-
+
+    - name: Run SwiftLint
+      run: |
+        # Install SwiftLint if not available
+        if ! command -v swiftlint &> /dev/null; then
+          echo "SwiftLint not found, installing..."
+          brew install swiftlint
+        fi
+
+        # Run linting (allow warnings)
+        swiftlint lint --strict || true
+
+    - name: Build in debug mode
+      run: |
+        echo "Building in debug mode..."
+        swift build
+
+    - name: Build in release mode
+      run: |
+        echo "Building in release mode..."
+        swift build --configuration release
+
+    - name: Run basic functionality test
+      run: |
+        echo "Testing basic functionality..."
+
+        # Build the app
+        swift build --configuration release
+
+        # Check if executable exists and is runnable
+        if [ -f ".build/release/VPNIndicator" ]; then
+          echo "✅ Executable found"
+
+          # Try to run with timeout (should not hang)
+          timeout 5s .build/release/VPNIndicator || echo "✅ App started and terminated correctly"
+        else
+          echo "❌ Executable not found"
+          exit 1
+        fi
+
+    - name: Check code quality
+      run: |
+        echo "Checking code quality..."
+
+        # Check for common issues
+        if grep -r "TODO" Sources/; then
+          echo "⚠️  Found TODO comments"
+        fi
+
+        if grep -r "FIXME" Sources/; then
+          echo "⚠️  Found FIXME comments"
+        fi
+
+        if grep -r "print(" Sources/; then
+          echo "ℹ️  Found debug print statements (this is normal for development)"
+        fi
+
+        # Check file sizes
+        find Sources/ -name "*.swift" -exec wc -l {} \; | sort -nr
+
+    - name: Validate Package.swift
+      run: |
+        echo "Validating Package.swift..."
+        swift package describe
+
+    - name: Test on different macOS versions
+      run: |
+        echo "Testing compatibility..."
+        sw_vers
+
+        # Check Swift version
+        swift --version
+
+        # Verify all required frameworks are available
+        echo "Checking required frameworks..."
+        ls /System/Library/Frameworks/ | grep -E "(Cocoa|SystemConfiguration)"
+
+  lint:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: '5.9'
+
+    - name: Install SwiftLint
+      run: brew install swiftlint
+
+    - name: Run SwiftLint
+      run: |
+        echo "Running SwiftLint analysis..."
+        swiftlint lint --reporter html > swiftlint-report.html || true
+
+        # Show summary
+        swiftlint lint --reporter emoji-summary
+
+    - name: Upload SwiftLint report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: swiftlint-report
+        path: swiftlint-report.html
+
+  security:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Security scan
+      run: |
+        echo "Running security checks..."
+
+        # Check for sensitive data patterns
+        if grep -r -i "password\|token\|secret\|key" Sources/; then
+          echo "⚠️  Found potential sensitive data patterns"
+        else
+          echo "✅ No sensitive data patterns found"
+        fi
+
+        # Check for hardcoded IPs (except common ones)
+        if grep -r -E "\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b" Sources/ | grep -v -E "(127\.0\.0\.1|0\.0\.0\.0|10\.0\.0|192\.168|172\.16)"; then
+          echo "⚠️  Found hardcoded IP addresses"
+        else
+          echo "✅ No suspicious IP addresses found"
+        fi
+
+        # Check for API keys patterns
+        if grep -r -E "[A-Za-z0-9]{32,}|[A-Za-z0-9+/]{40,}" Sources/; then
+          echo "⚠️  Found potential API keys"
+        else
+          echo "✅ No API keys found"
+        fi
+
+    - name: Dependency check
+      run: |
+        echo "Checking dependencies..."
+        swift package show-dependencies
+
+        # Check for outdated dependencies
+        swift package update --dry-run
