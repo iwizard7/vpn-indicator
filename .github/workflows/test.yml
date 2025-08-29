@@ -20,7 +20,7 @@ jobs:
         swift-version: '5.9'
 
     - name: Cache Swift dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           .build
@@ -129,7 +129,7 @@ jobs:
         swiftlint lint --reporter emoji-summary
 
     - name: Upload SwiftLint report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: swiftlint-report

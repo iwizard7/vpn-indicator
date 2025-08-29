@@ -19,7 +19,7 @@ jobs:
         swift-version: '5.9'
 
     - name: Cache Swift dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           .build
@@ -95,12 +95,10 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.version.outputs.version }}
-        release_name: VPN Indicator v${{ steps.version.outputs.version }}
+        name: VPN Indicator v${{ steps.version.outputs.version }}
         body: |
           ## 🚀 Automatic Release
 
@@ -129,16 +127,7 @@ jobs:
           *This release was automatically built and published by GitHub Actions*
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./VPN-Indicator-${{ steps.version.outputs.short_version }}.zip
-        asset_name: VPN-Indicator-${{ steps.version.outputs.short_version }}.zip
-        asset_content_type: application/zip
+        files: ./VPN-Indicator-${{ steps.version.outputs.short_version }}.zip
 
     - name: Update README with latest version
       run: |
